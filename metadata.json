@@ -1,0 +1,6 @@
+{
+  "name": "EcoTrack — Трекер углеродного следа",
+  "description": "Интерактивный калькулятор углеродного следа, наглядные графики выбросов CO₂, персонализированные рекомендации и трекер эко-привычек.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
