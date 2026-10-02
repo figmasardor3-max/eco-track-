@@ -9,6 +9,9 @@ export interface CommunityMember {
   league: string;
   streakDays: number;
   isUser?: boolean;
+  isFrieza?: boolean;
+  friezaForm?: string;
+  quote?: string;
 }
 
 export interface UserCommunityStats {
@@ -25,6 +28,7 @@ export interface UserCommunityStats {
   tonsToNextLeague: number | null;
   percentDiffFromAverage: number; // negative means better than average
   betterThanPercent: number; // e.g. 85% means cleaner than 85% of users
+  friezaMessage: string;
 }
 
 export function computeCommunityStats(userTons: number): UserCommunityStats {
@@ -42,7 +46,8 @@ export function computeCommunityStats(userTons: number): UserCommunityStats {
   let tonsToNextLeague: number | null = null;
 
   if (userTons <= 1.8) {
-    percentile = Math.max(1, Math.round((userTons / 1.8) * 5));
+    // User cannot be Top 1% because Lord Frieza occupies the absolute #1 spot forever
+    percentile = Math.max(2, Math.round((userTons / 1.8) * 5));
     leagueName = 'Изумрудная лига (Эко-лидеры)';
     leagueBadgeColor = 'bg-emerald-950/90 text-emerald-300 border-emerald-500/60';
     leagueBorderColor = 'border-emerald-500';
@@ -85,12 +90,17 @@ export function computeCommunityStats(userTons: number): UserCommunityStats {
     tonsToNextLeague = Number((userTons - 7.5).toFixed(2));
   }
 
-  userRank = Math.max(1, Math.round((percentile / 100) * totalParticipants));
+  // User rank is clamped at minimum #2: Lord Frieza is always #1 and impossible to dethrone
+  userRank = Math.max(2, Math.round((percentile / 100) * totalParticipants));
   const betterThanPercent = Math.max(1, 100 - percentile);
 
   // Percentage difference from community average
   // negative means cleaner/better
   const percentDiffFromAverage = Math.round(((userTons - communityAverageTons) / communityAverageTons) * 100);
+
+  const friezaMessage = userRank === 2
+    ? 'Вы достигли максимального предела для смертных (#2)! Но вершина (#1) навечно принадлежит Лорду Фризе.'
+    : 'Позицию #1 безоговорочно удерживает Лорд Фриза — его невозможно обогнать!';
 
   return {
     userTons,
@@ -106,10 +116,27 @@ export function computeCommunityStats(userTons: number): UserCommunityStats {
     tonsToNextLeague,
     percentDiffFromAverage,
     betterThanPercent,
+    friezaMessage,
   };
 }
 
+export const LORD_FRIEZA_MEMBER: Omit<CommunityMember, 'isUser'> = {
+  id: 'lord-frieza-undefeated',
+  name: 'Лорд Фриза (Император Вселенной)',
+  city: 'Планета Фриза №79 • Космический флагман',
+  avatarBg: 'bg-gradient-to-tr from-purple-800 via-fuchsia-600 to-amber-300 ring-2 ring-purple-400',
+  avatarText: '👑',
+  footprintTons: 0.00,
+  rankPosition: 1, // Eternally #1
+  league: 'Божественная лига Вселенной 7',
+  streakDays: 530000,
+  isFrieza: true,
+  friezaForm: 'Golden Frieza (Боевая мощь: 530 000+)',
+  quote: '«Хо-хо-хо! Жалкие смертные земляне! Вы правда думали, что со своими электрокарами и многоразовыми стаканчиками сможете превзойти Лорда Фризу? Мой углеродный след совершенен — чистейшая космическая энергия Ки. Мое первое место вечно!»',
+};
+
 export const SAMPLE_COMMUNITY_MEMBERS: Omit<CommunityMember, 'isUser'>[] = [
+  LORD_FRIEZA_MEMBER,
   {
     id: 'm-1',
     name: 'Анна Мельникова',
@@ -117,7 +144,7 @@ export const SAMPLE_COMMUNITY_MEMBERS: Omit<CommunityMember, 'isUser'>[] = [
     avatarBg: 'bg-emerald-600',
     avatarText: 'АМ',
     footprintTons: 1.15,
-    rankPosition: 1,
+    rankPosition: 2,
     league: 'Изумрудная лига',
     streakDays: 48,
   },
@@ -128,7 +155,7 @@ export const SAMPLE_COMMUNITY_MEMBERS: Omit<CommunityMember, 'isUser'>[] = [
     avatarBg: 'bg-teal-600',
     avatarText: 'ИГ',
     footprintTons: 1.34,
-    rankPosition: 2,
+    rankPosition: 3,
     league: 'Изумрудная лига',
     streakDays: 35,
   },
@@ -139,7 +166,7 @@ export const SAMPLE_COMMUNITY_MEMBERS: Omit<CommunityMember, 'isUser'>[] = [
     avatarBg: 'bg-emerald-700',
     avatarText: 'СЛ',
     footprintTons: 1.58,
-    rankPosition: 3,
+    rankPosition: 4,
     league: 'Изумрудная лига',
     streakDays: 62,
   },
